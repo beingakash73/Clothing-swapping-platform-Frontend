@@ -43,9 +43,13 @@ export interface ClothingItem {
   tags: string[];
   ecoSavedKgCo2: number;
   ecoSavedLitersWater: number;
+  imageUrl?: string;
+  imagePublicId?: string;
   createdAt: string;
   distanceKm?: number;
 }
+
+export type ClothesUploadDto = ClothingItem;
 
 export interface UserBadge {
   id: string;

@@ -41,7 +41,7 @@ interface AppContextType {
   switchUser: (userId: string) => void;
   openSwapModal: (item: ClothingItem) => void;
   closeSwapModal: () => void;
-  addClothingItem: (itemData: Partial<ClothingItem>) => ClothingItem;
+  addClothingItem: (itemData: Partial<ClothingItem>, files?: File[]) => Promise<ClothingItem>;
   updateClothingItem: (itemId: string, updates: Partial<ClothingItem>) => void;
   deleteClothingItem: (itemId: string) => void;
   proposeSwap: (
@@ -273,9 +273,67 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveSwapModalItem(null);
   };
 
-  const addClothingItem = (itemData: Partial<ClothingItem>): ClothingItem => {
+  const addClothingItem = async (
+    itemData: Partial<ClothingItem>,
+    files?: File[]
+  ): Promise<ClothingItem> => {
     const activeUser = currentUser || users[0];
     const newItemId = itemData.id || `item_${Date.now()}`;
+
+    // 1) If files are provided and backend API is connected, upload to Cloudinary
+    if (files && files.length > 0 && isApiConnected) {
+      try {
+        const formData = new FormData();
+        files.forEach((f) => formData.append('files', f));
+        if (files[0]) formData.append('file', files[0]);
+
+        if (itemData.title) formData.append('title', itemData.title);
+        if (itemData.description) formData.append('description', itemData.description);
+        if (itemData.brand) formData.append('brand', itemData.brand);
+        if (itemData.brandTier) formData.append('brandTier', itemData.brandTier);
+        if (itemData.category) formData.append('category', itemData.category);
+        if (itemData.subcategory) formData.append('subcategory', itemData.subcategory);
+        if (itemData.size) formData.append('size', itemData.size);
+        if (itemData.gender) formData.append('gender', itemData.gender);
+        if (itemData.condition) formData.append('condition', itemData.condition);
+        if (itemData.conditionNotes) formData.append('conditionNotes', itemData.conditionNotes);
+        if (itemData.material) formData.append('material', itemData.material);
+        if (itemData.color) formData.append('color', itemData.color);
+        if (itemData.originalPrice !== undefined) formData.append('originalPrice', String(itemData.originalPrice));
+        if (itemData.estimatedSwapValue !== undefined) formData.append('estimatedSwapValue', String(itemData.estimatedSwapValue));
+        if (itemData.tags && itemData.tags.length > 0) {
+          itemData.tags.forEach((t) => formData.append('tags', t));
+        }
+        formData.append('ownerId', activeUser.id);
+
+        const uploadedItem = await api.clothes.upload(formData);
+
+        setItems((prev) => [uploadedItem, ...prev]);
+        setUsers((prev) =>
+          prev.map((u) => {
+            if (u.id === activeUser.id) {
+              return {
+                ...u,
+                closetItemIds: [...u.closetItemIds, uploadedItem.id],
+              };
+            }
+            return u;
+          })
+        );
+
+        showToast(`"${uploadedItem.title}" uploaded to Cloudinary & published! ☁️✨`);
+        return uploadedItem;
+      } catch (err: any) {
+        console.warn('Cloudinary upload via backend failed, using fallback:', err);
+        showToast(err.message || 'Upload to Cloudinary encountered an issue, saving locally.');
+      }
+    }
+
+    // 2) Fallback or preset/URL creation
+    const previewUrl = files && files[0]
+      ? URL.createObjectURL(files[0])
+      : (itemData.images && itemData.images.length > 0 ? itemData.images[0] : 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1000&q=80');
+
     const newItem: ClothingItem = {
       id: newItemId,
       title: itemData.title || 'Untitled Garment',
@@ -292,9 +350,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       color: itemData.color || 'Neutral',
       originalPrice: itemData.originalPrice || 100,
       estimatedSwapValue: itemData.estimatedSwapValue || 50,
-      images: itemData.images && itemData.images.length > 0 
-        ? itemData.images 
-        : ['https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1000&q=80'],
+      images: itemData.images && itemData.images.length > 0
+        ? itemData.images
+        : [previewUrl],
+      imageUrl: itemData.imageUrl || previewUrl,
       ownerId: activeUser.id,
       ownerName: activeUser.name,
       ownerAvatar: activeUser.avatar,
@@ -310,48 +369,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
 
-    setItems(prev => [newItem, ...prev]);
+    setItems((prev) => [newItem, ...prev]);
 
     // Update user's closet item list
-    setUsers(prev => prev.map(u => {
-      if (u.id === activeUser.id) {
-        return {
-          ...u,
-          closetItemIds: [...u.closetItemIds, newItemId],
-        };
-      }
-      return u;
-    }));
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === activeUser.id) {
+          return {
+            ...u,
+            closetItemIds: [...u.closetItemIds, newItemId],
+          };
+        }
+        return u;
+      })
+    );
 
     // Persist to API database
     if (isApiConnected) {
-      api.items.create({ ...newItem, ownerId: activeUser.id }).catch(err => {
+      api.items.create({ ...newItem, ownerId: activeUser.id }).catch((err) => {
         console.error('Failed to sync item to API:', err);
       });
     }
 
-    showToast(`"${newItem.title}" was added to your closet & saved to database!`);
+    showToast(`"${newItem.title}" was added to your closet!`);
     return newItem;
   };
 
   const updateClothingItem = (itemId: string, updates: Partial<ClothingItem>) => {
-    setItems(prev => prev.map(item => item.id === itemId ? { ...item, ...updates } : item));
+    setItems((prev) => prev.map((item) => (item.id === itemId ? { ...item, ...updates } : item)));
     if (isApiConnected) {
-      api.items.update(itemId, updates).catch(err => console.error('API update item error:', err));
+      api.items.update(itemId, updates).catch((err) => console.error('API update item error:', err));
     }
     showToast('Listing updated successfully.');
   };
 
   const deleteClothingItem = (itemId: string) => {
-    setItems(prev => prev.filter(item => item.id !== itemId));
-    setUsers(prev => prev.map(u => ({
-      ...u,
-      closetItemIds: u.closetItemIds.filter(id => id !== itemId)
-    })));
+    setItems((prev) => prev.filter((item) => item.id !== itemId));
+    setUsers((prev) =>
+      prev.map((u) => ({
+        ...u,
+        closetItemIds: u.closetItemIds.filter((id) => id !== itemId),
+      }))
+    );
     if (isApiConnected) {
-      api.items.delete(itemId).catch(err => console.error('API delete item error:', err));
+      // Delete through clothes endpoint which destroys Cloudinary asset and deletes from MongoDB
+      api.clothes.delete(itemId).catch(() => {
+        api.items.delete(itemId).catch((err) => console.error('API delete item error:', err));
+      });
     }
-    showToast('Listing removed from marketplace.');
+    showToast('Listing removed from marketplace and Cloudinary.');
   };
 
   const deleteListingAsAdmin = (itemId: string) => {
@@ -446,7 +512,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const systemMsg: ChatMessage = {
         id: `msg_${Date.now()}`,
         swapId: swap.id,
-        senderId: currentUser.id,
+        senderId: currentUser?.id || 'user_unknown',
         text: `Accepted the swap request! Let's finalize the exchange details (meetup or shipping).`,
         timestamp: new Date().toISOString(),
         isSystem: true,
@@ -454,7 +520,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setMessages(prev => [...prev, systemMsg]);
     }
 
-    if (isApiConnected) {
+    if (isApiConnected && currentUser) {
       api.swaps.updateStatus(swapId, 'accept', { userId: currentUser.id }).catch(err =>
         console.error('API accept swap error:', err)
       );
@@ -487,7 +553,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const confirmAgreement = (swapId: string) => {
     setSwaps(prev => prev.map(s => {
       if (s.id === swapId) {
-        const isRequester = s.requesterId === currentUser.id;
+        const isRequester = s.requesterId === (currentUser?.id || '');
         const now = new Date().toISOString();
         const updated = {
           ...s,
@@ -504,14 +570,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const systemMsg: ChatMessage = {
       id: `msg_${Date.now()}`,
       swapId,
-      senderId: currentUser.id,
-      text: `🤝 Swap agreement confirmed by ${currentUser.name}! Items are locked in for exchange.`,
+      senderId: currentUser?.id || 'user_unknown',
+      text: `🤝 Swap agreement confirmed by ${currentUser?.name || 'User'}! Items are locked in for exchange.`,
       timestamp: new Date().toISOString(),
       isSystem: true,
     };
     setMessages(prev => [...prev, systemMsg]);
 
-    if (isApiConnected) {
+    if (isApiConnected && currentUser) {
       api.swaps.updateStatus(swapId, 'confirmAgreement', { userId: currentUser.id }).catch(err =>
         console.error('API confirm agreement error:', err)
       );
@@ -565,14 +631,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const systemMsg: ChatMessage = {
       id: `msg_${Date.now()}`,
       swapId,
-      senderId: currentUser.id,
+      senderId: currentUser?.id || 'user_unknown',
       text: `🎉 Swap completed! 2 garments diverted from landfills and 5,400L water conserved. Leave a review!`,
       timestamp: new Date().toISOString(),
       isSystem: true,
     };
     setMessages(prev => [...prev, systemMsg]);
 
-    if (isApiConnected) {
+    if (isApiConnected && currentUser) {
       api.swaps.updateStatus(swapId, 'complete', { userId: currentUser.id }).catch(err =>
         console.error('API complete swap error:', err)
       );
@@ -583,16 +649,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const sendMessage = (swapId: string, text: string) => {
     if (!text.trim()) return;
+    const currentId = currentUser?.id || 'user_unknown';
     const newMsg: ChatMessage = {
       id: `msg_${Date.now()}`,
       swapId,
-      senderId: currentUser.id,
+      senderId: currentId,
       text: text.trim(),
       timestamp: new Date().toISOString(),
     };
     setMessages(prev => [...prev, newMsg]);
 
-    if (isApiConnected) {
+    if (isApiConnected && currentUser) {
       api.messages.send({ swapId, senderId: currentUser.id, text }).then((_dbMsg) => {
         // Refresh message list from API
         api.messages.getBySwap(swapId).then(list => setMessages(list)).catch(() => {});
@@ -601,7 +668,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Offline simulated counterparty response
       const swap = swaps.find(s => s.id === swapId);
       if (swap) {
-        const otherUserId = swap.requesterId === currentUser.id ? swap.receiverId : swap.requesterId;
+        const otherUserId = swap.requesterId === currentId ? swap.receiverId : swap.requesterId;
         const otherUser = users.find(u => u.id === otherUserId);
         if (otherUser && otherUser.role !== 'admin') {
           setTimeout(() => {

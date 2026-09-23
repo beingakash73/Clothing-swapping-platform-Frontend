@@ -107,6 +107,40 @@ export const api = {
       }),
   },
 
+  // Cloudinary Clothes Upload & Cloud Storage
+  clothes: {
+    getAll: (): Promise<ClothingItem[]> => request<ClothingItem[]>('/clothes'),
+
+    getById: (id: string): Promise<ClothingItem> => request<ClothingItem>(`/clothes/${id}`),
+
+    upload: async (formData: FormData): Promise<ClothingItem> => {
+      const response = await fetch(`${API_BASE}/clothes/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let errorMsg = `Cloudinary upload failed: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message || errorData.error) {
+            errorMsg = errorData.message || errorData.error;
+          }
+        } catch {
+          // no body
+        }
+        throw new Error(errorMsg);
+      }
+
+      return response.json();
+    },
+
+    delete: (id: string): Promise<{ success: boolean; message?: string; id?: string }> =>
+      request<{ success: boolean; message?: string; id?: string }>(`/clothes/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
   // Swap Proposals
   swaps: {
     getAll: (params?: { userId?: string; status?: string }): Promise<SwapProposal[]> => {

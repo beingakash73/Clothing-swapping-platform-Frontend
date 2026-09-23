@@ -3,7 +3,7 @@ import { ClothingItem } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { ConditionBadge } from '../common/ConditionBadge';
 import { calculateDistanceKm } from '../../utils/formatters';
-import { MapPin, Star, ArrowLeftRight, Sparkles } from 'lucide-react';
+import { MapPin, Star, ArrowLeftRight, Sparkles, Cloud } from 'lucide-react';
 
 interface ItemCardProps {
   item: ClothingItem;
