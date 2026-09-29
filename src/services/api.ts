@@ -11,6 +11,12 @@ import {
 
 const API_BASE = '/api';
 
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  user?: User;
+}
+
 export interface HealthCheckResponse {
   status: string;
   database: string;
@@ -22,6 +28,7 @@ export interface HealthCheckResponse {
 // Generic fetch wrapper with error handling
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -46,6 +53,41 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  // Authentication & Credentials
+  auth: {
+    register: (data: {
+      name: string;
+      email: string;
+      password: string;
+      city?: string;
+      state?: string;
+      zip?: string;
+      bio?: string;
+      avatar?: string;
+    }): Promise<AuthResponse> =>
+      request<AuthResponse>('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+
+    login: (credentials: {
+      emailOrUsername: string;
+      password: string;
+    }): Promise<AuthResponse> =>
+      request<AuthResponse>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      }),
+
+    me: (): Promise<AuthResponse> =>
+      request<AuthResponse>('/auth/me'),
+
+    logout: (): Promise<AuthResponse> =>
+      request<AuthResponse>('/auth/logout', {
+        method: 'POST',
+      }),
+  },
+
   // Health & DB status
   checkHealth: (): Promise<HealthCheckResponse> => request<HealthCheckResponse>('/health'),
 
@@ -115,6 +157,7 @@ export const api = {
 
     upload: async (formData: FormData): Promise<ClothingItem> => {
       const response = await fetch(`${API_BASE}/clothes/upload`, {
+        credentials: 'include',
         method: 'POST',
         body: formData,
       });

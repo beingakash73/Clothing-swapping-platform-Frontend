@@ -48,7 +48,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
-      const res = await login(userId);
+      const res = await login(userId, 'password123');
       if (res.success) {
         onNavigate('dashboard');
       } else {
@@ -87,6 +87,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
       setErrorMessage('Please provide your name and email address.');
       return;
     }
+    if (!regPassword || regPassword.length < 6) {
+      setErrorMessage('Please provide a secure password (at least 6 characters).');
+      return;
+    }
     if (!agreedTerms) {
       setErrorMessage('Please accept the sustainable community charter to proceed.');
       return;
@@ -98,6 +102,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
       const res = await register({
         name: regName,
         email: regEmail,
+        password: regPassword,
         city: regCity,
         state: regState,
         bio: regBio,

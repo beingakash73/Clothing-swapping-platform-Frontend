@@ -36,7 +36,7 @@ interface AppContextType {
   isLoading: boolean;
   // Auth & User Actions
   login: (emailOrId: string, password?: string) => Promise<{ success: boolean; message?: string }>;
-  register: (userData: { name: string; email: string; city: string; state: string; bio?: string }) => Promise<{ success: boolean; message?: string }>;
+  register: (userData: { name: string; email: string; password?: string; city?: string; state?: string; bio?: string }) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   switchUser: (userId: string) => void;
   openSwapModal: (item: ClothingItem) => void;
@@ -156,12 +156,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const health = await api.checkHealth();
       if (health.status === 'ok') {
         setIsApiConnected(true);
-        const [fetchedUsers, fetchedItems, fetchedSwaps, fetchedDisputes, fetchedKpis] = await Promise.all([
+        const [fetchedUsers, fetchedItems, fetchedSwaps, fetchedDisputes, fetchedKpis, authSession] = await Promise.all([
           api.users.getAll().catch(() => null),
           api.items.getAll().catch(() => null),
           api.swaps.getAll().catch(() => null),
           api.disputes.getAll().catch(() => null),
           api.getKPIs().catch(() => null),
+          api.auth.me().catch(() => null),
         ]);
 
         if (fetchedUsers && fetchedUsers.length > 0) setUsers(fetchedUsers);
@@ -169,6 +170,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (fetchedSwaps && fetchedSwaps.length > 0) setSwaps(fetchedSwaps);
         if (fetchedDisputes && fetchedDisputes.length > 0) setDisputes(fetchedDisputes as any);
         if (fetchedKpis) setLiveKpis(fetchedKpis);
+        if (authSession?.success && authSession.user) {
+          setCurrentUserId(authSession.user.id);
+        }
       } else {
         setIsApiConnected(false);
       }
@@ -196,7 +200,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const currentUser = currentUserId ? (users.find(u => u.id === currentUserId) || null) : null;
   const isAuthenticated = !!currentUser;
 
-  const login = async (emailOrId: string, _password?: string): Promise<{ success: boolean; message?: string }> => {
+  const login = async (emailOrId: string, password?: string): Promise<{ success: boolean; message?: string }> => {
+    const pwd = password || 'password123';
+    if (isApiConnected) {
+      try {
+        const res = await api.auth.login({ emailOrUsername: emailOrId.trim(), password: pwd });
+        if (res.success && res.user) {
+          setUsers(prev => {
+            const exists = prev.some(u => u.id === res.user!.id);
+            return exists ? prev.map(u => u.id === res.user!.id ? res.user! : u) : [res.user!, ...prev];
+          });
+          setCurrentUserId(res.user.id);
+          showToast(`Welcome back, ${res.user.name}! 🌿`);
+          return { success: true };
+        }
+      } catch (err: any) {
+        return { success: false, message: err.message || 'Invalid email or password.' };
+      }
+    }
     const trimmed = emailOrId.trim().toLowerCase();
     const found = users.find(u => 
       u.id.toLowerCase() === trimmed || 
@@ -205,13 +226,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     if (found) {
       setCurrentUserId(found.id);
-      showToast(`Welcome back, ${found.name}! 🎉`);
+      showToast(`Welcome back, ${found.name}! 🌿`);
       return { success: true };
     }
     return { success: false, message: 'Invalid credentials. Please select a demo persona or create an account.' };
   };
 
-  const register = async (userData: { name: string; email: string; city: string; state: string; bio?: string }): Promise<{ success: boolean; message?: string }> => {
+  const register = async (userData: { name: string; email: string; password?: string; city?: string; state?: string; bio?: string }): Promise<{ success: boolean; message?: string }> => {
+    if (isApiConnected) {
+      try {
+        const res = await api.auth.register({
+          name: userData.name,
+          email: userData.email,
+          password: userData.password || 'password123',
+          city: userData.city,
+          state: userData.state,
+          bio: userData.bio,
+        });
+        if (res.success && res.user) {
+          setUsers(prev => [res.user!, ...prev.filter(u => u.id !== res.user!.id)]);
+          setCurrentUserId(res.user.id);
+          showToast(`Welcome to ThreadLoop, ${res.user.name}! ✨`);
+          return { success: true };
+        }
+      } catch (err: any) {
+        return { success: false, message: err.message || 'Registration failed.' };
+      }
+    }
     const newUserId = `user_${Date.now()}`;
     const newUser: User = {
       id: newUserId,
@@ -237,7 +278,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       badges: [{
         id: 'badge_welcome',
         name: 'Circular Pioneer',
-        icon: '🌱',
+        icon: 'Sparkles',
         description: 'Joined the zero-waste garment exchange community.',
         unlockedAt: new Date().toISOString(),
       }],
@@ -247,11 +288,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setUsers(prev => [newUser, ...prev]);
     setCurrentUserId(newUserId);
-    showToast(`Welcome to ThreadLoop, ${newUser.name}! 🌿`);
+    showToast(`Welcome to ThreadLoop, ${newUser.name}! ✨`);
     return { success: true };
   };
 
   const logout = () => {
+    if (isApiConnected) {
+      api.auth.logout().catch(() => null);
+    }
     setCurrentUserId(null);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
     showToast('You have been safely signed out. See you next time!');
@@ -260,6 +304,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const switchUser = (userId: string) => {
     const found = users.find(u => u.id === userId);
     if (found) {
+      if (isApiConnected) {
+        api.auth.login({ emailOrUsername: userId, password: 'password123' }).catch(() => null);
+      }
       setCurrentUserId(userId);
       showToast(`Switched persona to ${found.name} (${found.role === 'admin' ? 'Admin' : 'User'})`);
     }
