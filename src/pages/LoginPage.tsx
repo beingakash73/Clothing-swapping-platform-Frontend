@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Sparkles, 
-  Leaf, 
-  ShieldCheck, 
-  ArrowRight, 
-  Lock, 
-  Mail, 
-  User as UserIcon, 
-  MapPin, 
-  Eye, 
-  EyeOff, 
-  CheckCircle2, 
-  Repeat, 
+import {
+  Sparkles,
+  Leaf,
+  ShieldCheck,
+  ArrowRight,
+  Lock,
+  Mail,
+  User as UserIcon,
+  MapPin,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  Repeat,
   Droplet,
   LogIn
 } from 'lucide-react';
@@ -122,7 +122,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
   return (
     <div className="min-h-[calc(100vh-80px)] py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#F7F4EE] via-[#FAF8F5] to-white flex items-center justify-center">
       <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        
+
         {/* Left Col: Sustainable Brand Showcase */}
         <div className="lg:col-span-5 bg-gradient-to-br from-forest-900 via-forest-800 to-forest-950 rounded-3xl p-8 sm:p-10 text-white flex flex-col justify-between relative overflow-hidden shadow-2xl border border-forest-700/50">
           {/* Subtle eco background glow */}
@@ -197,8 +197,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
                   {mode === 'login' ? 'Welcome Back' : 'Create an Account'}
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {mode === 'login' 
-                    ? 'Enter your credentials or choose a quick demo persona.' 
+                  {mode === 'login'
+                    ? 'Enter your credentials or choose a quick demo persona.'
                     : 'Start swapping garments with zero monetary transactions.'}
                 </p>
               </div>
@@ -208,22 +208,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
                 <button
                   type="button"
                   onClick={() => { setMode('login'); setErrorMessage(null); }}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    mode === 'login' 
-                      ? 'bg-white text-forest-900 shadow-sm' 
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${mode === 'login'
+                      ? 'bg-white text-forest-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                    }`}
                 >
                   Sign In
                 </button>
                 <button
                   type="button"
                   onClick={() => { setMode('register'); setErrorMessage(null); }}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    mode === 'register' 
-                      ? 'bg-white text-forest-900 shadow-sm' 
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${mode === 'register'
+                      ? 'bg-white text-forest-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                    }`}
                 >
                   Register
                 </button>
@@ -319,7 +317,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
                     <input type="checkbox" defaultChecked className="rounded text-forest-700 focus:ring-forest-500" />
                     <span>Remember my session</span>
                   </label>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => {
                       setLoginIdentifier('maya@threadloop.org');
@@ -486,11 +484,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
                       key={u.id}
                       type="button"
                       onClick={() => handleQuickLogin(u.id)}
-                      className={`p-2.5 rounded-2xl border text-left transition-all relative flex flex-col items-center sm:items-start text-center sm:text-left ${
-                        isCurrent
+                      className={`p-2.5 rounded-2xl border text-left transition-all relative flex flex-col items-center sm:items-start text-center sm:text-left ${isCurrent
                           ? 'border-forest-600 bg-forest-50/80 ring-1 ring-forest-500 shadow-sm'
                           : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
-                      }`}
+                        }`}
                     >
                       <img
                         src={u.avatar}
@@ -516,10 +513,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
           <div className="pt-6 text-center text-xs text-slate-400 flex items-center justify-center gap-4">
             <button onClick={() => onNavigate('home')} className="hover:text-forest-700 underline underline-offset-2">
               ← Return to Marketplace Home
-            </button>
-            <span>•</span>
-            <button onClick={() => onNavigate('prd')} className="hover:text-forest-700 underline underline-offset-2">
-              Platform PRD Spec
             </button>
           </div>
         </div>

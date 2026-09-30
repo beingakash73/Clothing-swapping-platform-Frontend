@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  Repeat, 
-  PlusCircle, 
-  MessageSquare, 
-  ArrowLeftRight, 
-  User as UserIcon, 
-  ShieldCheck, 
-  Compass, 
-  Calculator, 
-  FileText, 
-  ChevronDown, 
-  Sparkles, 
+import {
+  Repeat,
+  PlusCircle,
+  MessageSquare,
+  ArrowLeftRight,
+  User as UserIcon,
+  ShieldCheck,
+  Compass,
+  Calculator,
+  ChevronDown,
+  Sparkles,
   MapPin,
   LogIn,
   LogOut
@@ -23,33 +22,32 @@ interface NavbarProps {
   onOpenCreateListing: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ 
-  currentView, 
-  onNavigate, 
-  onOpenCreateListing 
+export const Navbar: React.FC<NavbarProps> = ({
+  currentView,
+  onNavigate,
+  onOpenCreateListing
 }) => {
   const { currentUser, isAuthenticated, users, switchUser, swaps, isApiConnected, logout } = useApp();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Count active pending swaps for current user if logged in
   const pendingSwapsCount = currentUser ? swaps.filter(
-    s => (s.receiverId === currentUser.id && s.status === 'pending') || 
-         (s.status === 'negotiating' && (s.receiverId === currentUser.id || s.requesterId === currentUser.id))
+    s => (s.receiverId === currentUser.id && s.status === 'pending') ||
+      (s.status === 'negotiating' && (s.receiverId === currentUser.id || s.requesterId === currentUser.id))
   ).length : 0;
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Sparkles },
     { id: 'explore', label: 'Explore Closet', icon: Compass },
     { id: 'calculator', label: 'Value Calculator', icon: Calculator },
-    { 
-      id: 'swaps', 
-      label: 'My Swaps', 
-      icon: ArrowLeftRight, 
-      badge: pendingSwapsCount > 0 ? pendingSwapsCount : undefined 
+    {
+      id: 'swaps',
+      label: 'My Swaps',
+      icon: ArrowLeftRight,
+      badge: pendingSwapsCount > 0 ? pendingSwapsCount : undefined
     },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
     { id: 'dashboard', label: 'My Closet', icon: UserIcon },
-    { id: 'prd', label: 'PRD Docs', icon: FileText },
   ];
 
   if (currentUser && currentUser.role === 'admin') {
@@ -67,11 +65,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           </span>
 
           <div className="hidden md:flex items-center gap-4 text-stone-300">
-            <span className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase transition-colors ${
-              isApiConnected 
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+            <span className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase transition-colors ${isApiConnected
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                 : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-            }`}>
+              }`}>
               <span className={`w-1.5 h-1.5 rounded-full ${isApiConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
               {isApiConnected ? 'Spring Boot & MongoDB: Live' : 'Backend: Disconnected (Offline)'}
             </span>
@@ -79,12 +76,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <MapPin className="w-3 h-3 text-emerald-400" />
               Active in New York & Local Swap Hubs
             </span>
-            <button 
-              onClick={() => onNavigate('prd')}
-              className="text-emerald-300 hover:text-white transition-colors underline underline-offset-2"
-            >
-              View System PRD
-            </button>
           </div>
         </div>
       </div>
@@ -93,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Brand Logo */}
-          <button 
+          <button
             onClick={() => onNavigate('home')}
             className="flex items-center gap-2.5 text-left group"
           >
@@ -119,11 +110,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                    isActive 
-                      ? 'bg-forest-50 text-forest-800 font-semibold shadow-xs' 
+                  className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${isActive
+                      ? 'bg-forest-50 text-forest-800 font-semibold shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-stone-100/60'
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-forest-700' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
@@ -248,9 +238,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                               switchUser(u.id);
                               setUserMenuOpen(false);
                             }}
-                            className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-left transition-colors ${
-                              isSelected ? 'bg-forest-50 border border-forest-200' : 'hover:bg-stone-50'
-                            }`}
+                            className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-left transition-colors ${isSelected ? 'bg-forest-50 border border-forest-200' : 'hover:bg-stone-50'
+                              }`}
                           >
                             <img
                               src={u.avatar}
@@ -316,11 +305,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${
-                  isActive 
-                    ? 'bg-forest-800 text-white font-semibold' 
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${isActive
+                    ? 'bg-forest-800 text-white font-semibold'
                     : 'bg-stone-100 text-slate-700'
-                }`}
+                  }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{item.label}</span>

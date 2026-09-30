@@ -78,11 +78,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <button onClick={() => onNavigate('prd')} className="text-emerald-400 hover:underline flex items-center gap-1">
-                  Product PRD Document ↗
-                </button>
-              </li>
-              <li>
                 <button onClick={() => onNavigate('admin')} className="hover:text-emerald-400 transition-colors">
                   Admin Moderation Hub
                 </button>
