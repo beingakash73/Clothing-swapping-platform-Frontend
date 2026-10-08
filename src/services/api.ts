@@ -11,10 +11,38 @@ import {
 
 const API_BASE = '/api';
 
+export const TOKEN_STORAGE_KEY = 'threadloop_jwt_token';
+
+export const tokenStorage = {
+  get: (): string | null => {
+    try {
+      return localStorage.getItem(TOKEN_STORAGE_KEY);
+    } catch {
+      return null;
+    }
+  },
+  set: (token: string): void => {
+    try {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    } catch {
+      // storage unavailable
+    }
+  },
+  clear: (): void => {
+    try {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    } catch {
+      // storage unavailable
+    }
+  },
+};
+
 export interface AuthResponse {
   success: boolean;
   message: string;
   user?: User;
+  token?: string;
+  tokenType?: string;
 }
 
 export interface HealthCheckResponse {
@@ -25,15 +53,19 @@ export interface HealthCheckResponse {
   timestamp: string;
 }
 
-// Generic fetch wrapper with error handling
+// Generic fetch wrapper with error handling and automatic Bearer JWT injection
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const token = tokenStorage.get();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...((options.headers as Record<string, string>) || {}),
+  };
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
     ...options,
+    headers,
   });
 
   if (!response.ok) {
@@ -55,7 +87,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 export const api = {
   // Authentication & Credentials
   auth: {
-    register: (data: {
+    register: async (data: {
       name: string;
       email: string;
       password: string;
@@ -64,28 +96,43 @@ export const api = {
       zip?: string;
       bio?: string;
       avatar?: string;
-    }): Promise<AuthResponse> =>
-      request<AuthResponse>('/auth/register', {
+    }): Promise<AuthResponse> => {
+      const res = await request<AuthResponse>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
-      }),
+      });
+      if (res.success && res.token) {
+        tokenStorage.set(res.token);
+      }
+      return res;
+    },
 
-    login: (credentials: {
+    login: async (credentials: {
       emailOrUsername: string;
       password: string;
-    }): Promise<AuthResponse> =>
-      request<AuthResponse>('/auth/login', {
+    }): Promise<AuthResponse> => {
+      const res = await request<AuthResponse>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
-      }),
+      });
+      if (res.success && res.token) {
+        tokenStorage.set(res.token);
+      }
+      return res;
+    },
 
     me: (): Promise<AuthResponse> =>
       request<AuthResponse>('/auth/me'),
 
-    logout: (): Promise<AuthResponse> =>
-      request<AuthResponse>('/auth/logout', {
-        method: 'POST',
-      }),
+    logout: async (): Promise<AuthResponse> => {
+      try {
+        return await request<AuthResponse>('/auth/logout', {
+          method: 'POST',
+        });
+      } finally {
+        tokenStorage.clear();
+      }
+    },
   },
 
   // Health & DB status
@@ -156,8 +203,12 @@ export const api = {
     getById: (id: string): Promise<ClothingItem> => request<ClothingItem>(`/clothes/${id}`),
 
     upload: async (formData: FormData): Promise<ClothingItem> => {
+      const token = tokenStorage.get();
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
       const response = await fetch(`${API_BASE}/clothes/upload`, {
         credentials: 'include',
+        headers,
         method: 'POST',
         body: formData,
       });
