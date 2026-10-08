@@ -61,7 +61,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
   const [imageUrl, setImageUrl] = useState(SAMPLE_PHOTO_PRESETS[0].url);
   const [tagsInput, setTagsInput] = useState('Sustainable, Minimalist');
 
-  // Cloudinary Upload Mode: 'upload' (real photos to Cloudinary) or 'presets' (Unsplash demo/URL)
+  // Photo Upload Mode: 'upload' (real photos) or 'presets' (Unsplash demo/URL)
   const [photoSourceMode, setPhotoSourceMode] = useState<'upload' | 'presets'>('upload');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<FilePreviewItem[]>([]);
@@ -155,7 +155,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
     if (!title.trim() || !brand.trim()) return;
 
     if (photoSourceMode === 'upload' && selectedFiles.length === 0) {
-      setUploadError('Please select at least one garment photo to upload to Cloudinary, or switch to Sample Presets.');
+      setUploadError('Please select at least one garment photo to upload, or switch to Sample Presets.');
       return;
     }
 
@@ -212,11 +212,11 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 </h2>
                 <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-forest-100 text-forest-800 border border-forest-200 flex items-center gap-1">
                   <Cloud className="w-2.5 h-2.5" />
-                  Cloudinary
+                  Cloud Storage
                 </span>
               </div>
               <p className="text-xs text-stone-500">
-                Upload real photos to Cloudinary CDN & join circular trading
+                Upload real photos & join circular trading
               </p>
             </div>
           </div>
@@ -403,7 +403,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
             </div>
           </div>
 
-          {/* PHOTO UPLOAD SECTION WITH CLOUDINARY INTEGRATION */}
+          {/* PHOTO UPLOAD SECTION */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold uppercase tracking-wider text-stone-800 flex items-center gap-1.5">
@@ -438,7 +438,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
               </div>
             </div>
 
-            {/* TAB 1: Real Cloudinary File Upload Dropzone */}
+            {/* TAB 1: File Upload Dropzone */}
             {photoSourceMode === 'upload' && (
               <div className="space-y-3">
                 {/* Drag & Drop Box */}
@@ -477,7 +477,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
 
                     <div className="mt-1 flex items-center gap-2 text-[11px] text-forest-700 font-medium bg-forest-50 px-3 py-1 rounded-full border border-forest-200">
                       <FileCheck2 className="w-3.5 h-3.5" />
-                      <span>Direct upload to Cloudinary &bull; Stored in MongoDB</span>
+                      <span>Direct photo upload &bull; Secure cloud storage</span>
                     </div>
                   </div>
                 </div>
@@ -657,7 +657,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
           <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
               <span className={`w-2 h-2 rounded-full ${isApiConnected ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-              <span>{isApiConnected ? 'Connected to Cloudinary & Mongo' : 'Local Demo Mode'}</span>
+              <span>{isApiConnected ? 'Connected to Server' : 'Local Demo Mode'}</span>
             </div>
 
             <div className="flex items-center gap-3">
@@ -678,7 +678,7 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({
                 {isUploading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Uploading to Cloudinary...</span>
+                    <span>Uploading photos...</span>
                   </>
                 ) : (
                   <>

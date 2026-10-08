@@ -70,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
               }`}>
               <span className={`w-1.5 h-1.5 rounded-full ${isApiConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              {isApiConnected ? 'Spring Boot & MongoDB: Live' : 'Backend: Disconnected (Offline)'}
+              {isApiConnected ? 'Server: Live' : 'Backend: Disconnected (Offline)'}
             </span>
             <span className="flex items-center gap-1">
               <MapPin className="w-3 h-3 text-emerald-400" />

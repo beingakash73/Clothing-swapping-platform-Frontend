@@ -95,7 +95,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <li className="pt-2">
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-stone-800 text-stone-300 border border-stone-700">
                   <span className={`w-1.5 h-1.5 rounded-full ${isApiConnected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                  {isApiConnected ? 'Backend: Spring Boot + MongoDB' : 'Backend: Disconnected'}
+                  {isApiConnected ? 'Backend: Connected' : 'Backend: Disconnected'}
                 </span>
               </li>
             </ul>

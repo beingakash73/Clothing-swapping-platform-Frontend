@@ -150,7 +150,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem(STORAGE_KEYS.DISPUTES, JSON.stringify(disputes));
   }, [disputes]);
 
-  // Initial fetch and sync from Backend REST API (Spring Boot + MongoDB)
+  // Initial fetch and sync from Backend REST API
   const refreshFromApi = useCallback(async () => {
     try {
       const health = await api.checkHealth();
@@ -327,7 +327,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const activeUser = currentUser || users[0];
     const newItemId = itemData.id || `item_${Date.now()}`;
 
-    // 1) If files are provided and backend API is connected, upload to Cloudinary
+    // 1) If files are provided and backend API is connected, upload via backend
     if (files && files.length > 0 && isApiConnected) {
       try {
         const formData = new FormData();
@@ -368,11 +368,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           })
         );
 
-        showToast(`"${uploadedItem.title}" uploaded to Cloudinary & published! ☁️✨`);
+        showToast(`"${uploadedItem.title}" uploaded & published successfully! ✨`);
         return uploadedItem;
       } catch (err: any) {
-        console.warn('Cloudinary upload via backend failed, using fallback:', err);
-        showToast(err.message || 'Upload to Cloudinary encountered an issue, saving locally.');
+        console.warn('Upload via backend failed, using fallback:', err);
+        showToast(err.message || 'Photo upload encountered an issue, saving locally.');
       }
     }
 
@@ -459,12 +459,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }))
     );
     if (isApiConnected) {
-      // Delete through clothes endpoint which destroys Cloudinary asset and deletes from MongoDB
+      // Delete through clothes endpoint
       api.clothes.delete(itemId).catch(() => {
         api.items.delete(itemId).catch((err) => console.error('API delete item error:', err));
       });
     }
-    showToast('Listing removed from marketplace and Cloudinary.');
+    showToast('Listing removed from marketplace.');
   };
 
   const deleteListingAsAdmin = (itemId: string) => {
@@ -542,7 +542,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     closeSwapModal();
-    showToast('Swap request sent successfully! Persisted to database.');
+    showToast('Swap request sent successfully!');
     return newSwap;
   };
 
@@ -765,7 +765,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         await api.resetDatabase();
         await refreshFromApi();
-        showToast('Database reset and re-seeded to pristine sample data!');
+        showToast('Sample data reset and re-seeded successfully!');
         return;
       } catch (err) {
         console.error('Failed to reset DB via API:', err);

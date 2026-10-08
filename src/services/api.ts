@@ -196,7 +196,7 @@ export const api = {
       }),
   },
 
-  // Cloudinary Clothes Upload & Cloud Storage
+  // Clothes Upload & Storage
   clothes: {
     getAll: (): Promise<ClothingItem[]> => request<ClothingItem[]>('/clothes'),
 
@@ -214,7 +214,7 @@ export const api = {
       });
 
       if (!response.ok) {
-        let errorMsg = `Cloudinary upload failed: ${response.status} ${response.statusText}`;
+        let errorMsg = `Upload failed: ${response.status} ${response.statusText}`;
         try {
           const errorData = await response.json();
           if (errorData.message || errorData.error) {
