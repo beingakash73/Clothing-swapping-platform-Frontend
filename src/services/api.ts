@@ -173,7 +173,7 @@ export const api = {
         });
       }
       const qs = params.toString() ? `?${params.toString()}` : '';
-      return request<ClothingItem[]>(`/items${qs}`);
+      return request<ClothingItem[]>(`/api/items${qs}`);
     },
 
     getById: (id: string): Promise<ClothingItem> => request<ClothingItem>(`/items/${id}`),
@@ -287,7 +287,7 @@ export const api = {
 
   // Disputes & Moderation
   disputes: {
-    getAll: (): Promise<Dispute[]> => request<Dispute[]>('/disputes'),
+    getAll: (): Promise<Dispute[]> => request<Dispute[]>('/api/disputes'),
 
     create: (data: {
       swapId: string;
@@ -296,7 +296,7 @@ export const api = {
       reason: string;
       description: string;
     }): Promise<Dispute> =>
-      request<Dispute>('/disputes', {
+      request<Dispute>('/api/disputes', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
