@@ -97,7 +97,7 @@ export const api = {
       bio?: string;
       avatar?: string;
     }): Promise<AuthResponse> => {
-      const res = await request<AuthResponse>('/api/register', {
+      const res = await request<AuthResponse>('/api/auth/api/register', {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -239,10 +239,10 @@ export const api = {
   swaps: {
     getAll: (params?: { userId?: string; status?: string }): Promise<SwapProposal[]> => {
       const qs = new URLSearchParams(params as any).toString();
-      return request<SwapProposal[]>(`/swaps${qs ? `?${qs}` : ''}`);
+      return request<SwapProposal[]>(`/api/swaps${qs ? `?${qs}` : ''}`);
     },
 
-    getById: (id: string): Promise<SwapProposal> => request<SwapProposal>(`/swaps/${id}`),
+    getById: (id: string): Promise<SwapProposal> => request<SwapProposal>(`/api/swaps/${id}`),
 
     propose: (data: {
       requesterId: string;
