@@ -136,7 +136,7 @@ export const api = {
   },
 
   // Health & DB status
-  checkHealth: (): Promise<HealthCheckResponse> => request<HealthCheckResponse>('/api/health'),
+  checkHealth: (): Promise<HealthCheckResponse> => request<HealthCheckResponse>('/health'),
 
   // Platform KPIs
   getKPIs: (): Promise<PlatformKPIs> => request<PlatformKPIs>('/api/kpis'),
