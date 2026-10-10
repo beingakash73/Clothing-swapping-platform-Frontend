@@ -1,12 +1,12 @@
-import { 
-  ClothingItem, 
-  User, 
-  SwapProposal, 
-  ChatMessage, 
-  Dispute, 
+import {
+  ClothingItem,
+  User,
+  SwapProposal,
+  ChatMessage,
+  Dispute,
   PlatformKPIs,
   ExchangeMethod,
-  MeetupLocation 
+  MeetupLocation
 } from '../types';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
@@ -97,7 +97,7 @@ export const api = {
       bio?: string;
       avatar?: string;
     }): Promise<AuthResponse> => {
-      const res = await request<AuthResponse>('/auth/register', {
+      const res = await request<AuthResponse>('/api/register', {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -111,7 +111,7 @@ export const api = {
       emailOrUsername: string;
       password: string;
     }): Promise<AuthResponse> => {
-      const res = await request<AuthResponse>('/auth/login', {
+      const res = await request<AuthResponse>('/api/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
       });
@@ -122,11 +122,11 @@ export const api = {
     },
 
     me: (): Promise<AuthResponse> =>
-      request<AuthResponse>('/auth/me'),
+      request<AuthResponse>('/api/me'),
 
     logout: async (): Promise<AuthResponse> => {
       try {
-        return await request<AuthResponse>('/auth/logout', {
+        return await request<AuthResponse>('/api/logout', {
           method: 'POST',
         });
       } finally {
@@ -136,20 +136,20 @@ export const api = {
   },
 
   // Health & DB status
-  checkHealth: (): Promise<HealthCheckResponse> => request<HealthCheckResponse>('/health'),
+  checkHealth: (): Promise<HealthCheckResponse> => request<HealthCheckResponse>('/api/health'),
 
   // Platform KPIs
-  getKPIs: (): Promise<PlatformKPIs> => request<PlatformKPIs>('/kpis'),
+  getKPIs: (): Promise<PlatformKPIs> => request<PlatformKPIs>('/api/kpis'),
 
   // Safe Meetup Hubs
-  getHubs: (): Promise<MeetupLocation[]> => request<MeetupLocation[]>('/hubs'),
+  getHubs: (): Promise<MeetupLocation[]> => request<MeetupLocation[]>('/api/hubs'),
 
   // Users
   users: {
-    getAll: (): Promise<User[]> => request<User[]>('/users'),
-    getById: (id: string): Promise<User> => request<User>(`/users/${id}`),
-    update: (id: string, data: Partial<User>): Promise<User> => 
-      request<User>(`/users/${id}`, {
+    getAll: (): Promise<User[]> => request<User[]>('/api/users'),
+    getById: (id: string): Promise<User> => request<User>(`/api/users/${id}`),
+    update: (id: string, data: Partial<User>): Promise<User> =>
+      request<User>(`/api/users/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
