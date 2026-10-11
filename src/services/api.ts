@@ -9,7 +9,7 @@ import {
   MeetupLocation
 } from '../types';
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
+const API_BASE = (import.meta.env.VITE_API_BASE_URL).replace(/\/+$/, '');
 
 export const TOKEN_STORAGE_KEY = 'threadloop_jwt_token';
 
