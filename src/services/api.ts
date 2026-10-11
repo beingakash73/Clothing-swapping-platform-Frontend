@@ -97,7 +97,7 @@ export const api = {
       bio?: string;
       avatar?: string;
     }): Promise<AuthResponse> => {
-      const res = await request<AuthResponse>('/api/auth/api/register', {
+      const res = await request<AuthResponse>('/register', {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -111,7 +111,7 @@ export const api = {
       emailOrUsername: string;
       password: string;
     }): Promise<AuthResponse> => {
-      const res = await request<AuthResponse>('/api/login', {
+      const res = await request<AuthResponse>('/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
       });
@@ -122,11 +122,11 @@ export const api = {
     },
 
     me: (): Promise<AuthResponse> =>
-      request<AuthResponse>('/api/me'),
+      request<AuthResponse>('/me'),
 
     logout: async (): Promise<AuthResponse> => {
       try {
-        return await request<AuthResponse>('/api/logout', {
+        return await request<AuthResponse>('/logout', {
           method: 'POST',
         });
       } finally {
