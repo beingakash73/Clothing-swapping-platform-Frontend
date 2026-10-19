@@ -66,8 +66,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <div className="hidden md:flex items-center gap-4 text-stone-300">
             <span className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase transition-colors ${isApiConnected
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+              : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
               }`}>
               <span className={`w-1.5 h-1.5 rounded-full ${isApiConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
               {isApiConnected ? 'Server: Live' : 'Backend: Disconnected (Offline)'}
@@ -111,8 +111,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
                   className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${isActive
-                      ? 'bg-forest-50 text-forest-800 font-semibold shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-stone-100/60'
+                    ? 'bg-forest-50 text-forest-800 font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-stone-100/60'
                     }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-forest-700' : 'text-slate-400'}`} />
@@ -133,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={() => {
                 if (!isAuthenticated) {
-                  onNavigate('login');
+                  onNavigate('logout');
                 } else {
                   onOpenCreateListing();
                 }
@@ -306,8 +306,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${isActive
-                    ? 'bg-forest-800 text-white font-semibold'
-                    : 'bg-stone-100 text-slate-700'
+                  ? 'bg-forest-800 text-white font-semibold'
+                  : 'bg-stone-100 text-slate-700'
                   }`}
               >
                 <Icon className="w-3.5 h-3.5" />
