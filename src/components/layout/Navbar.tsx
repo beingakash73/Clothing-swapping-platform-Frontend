@@ -133,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={() => {
                 if (!isAuthenticated) {
-                  onNavigate('logout');
+                  onNavigate('login');
                 } else {
                   onOpenCreateListing();
                 }
@@ -148,7 +148,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               /* Authenticated User Menu Dropdown */
               <div className="relative">
                 <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      onNavigate('login');
+                    } else {
+                      setUserMenuOpen(!userMenuOpen)
+                    }
+                  }}
                   className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl border border-stone-200 bg-stone-50 hover:bg-white hover:border-stone-300 transition-all text-left focus:outline-none shadow-2xs"
                 >
                   <img
