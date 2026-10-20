@@ -1,3 +1,4 @@
+import { stompChatService } from '../services/websocket';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { 
   ClothingItem, 
@@ -33,6 +34,7 @@ interface AppContextType {
   activeSwapModalItem: ClothingItem | null;
   toastMessage: string | null;
   isApiConnected: boolean;
+  isWsConnected: boolean;
   isLoading: boolean;
   // Auth & User Actions
   login: (emailOrId: string, password?: string) => Promise<{ success: boolean; message?: string }>;
@@ -109,6 +111,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [liveKpis, setLiveKpis] = useState<PlatformKPIs | null>(null);
   const [isApiConnected, setIsApiConnected] = useState<boolean>(false);
+  const [isWsConnected, setIsWsConnected] = useState<boolean>(false);
+
+  // Initialize WebSocket STOMP messaging connection and listener
+  useEffect(() => {
+    const unsubStatus = stompChatService.onConnectionChange((connected) => {
+      setIsWsConnected(connected);
+    });
+
+    const unsubMessages = stompChatService.subscribeToSwap('all', (incomingMsg) => {
+      setMessages((prev) => {
+        const exists = prev.some((m) => m.id === incomingMsg.id);
+        if (exists) return prev;
+        return [...prev, incomingMsg];
+      });
+    });
+
+    stompChatService.connect();
+
+    return () => {
+      unsubStatus();
+      unsubMessages();
+    };
+  }, []);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [activeSwapModalItem, setActiveSwapModalItem] = useState<ClothingItem | null>(null);
@@ -156,12 +181,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const health = await api.checkHealth();
       if (health.status === 'ok') {
         setIsApiConnected(true);
-        const [fetchedUsers, fetchedItems, fetchedSwaps, fetchedDisputes, fetchedKpis, authSession] = await Promise.all([
+        const [fetchedUsers, fetchedItems, fetchedSwaps, fetchedDisputes, fetchedKpis, fetchedMessages, authSession] = await Promise.all([
           api.users.getAll().catch(() => null),
           api.items.getAll().catch(() => null),
           api.swaps.getAll().catch(() => null),
           api.disputes.getAll().catch(() => null),
           api.getKPIs().catch(() => null),
+          api.messages.getAll().catch(() => null),
           api.auth.me().catch(() => null),
         ]);
 
@@ -170,6 +196,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (fetchedSwaps && fetchedSwaps.length > 0) setSwaps(fetchedSwaps);
         if (fetchedDisputes && fetchedDisputes.length > 0) setDisputes(fetchedDisputes as any);
         if (fetchedKpis) setLiveKpis(fetchedKpis);
+        if (fetchedMessages && fetchedMessages.length > 0) setMessages(fetchedMessages);
         if (authSession?.success && authSession.user) {
           setCurrentUserId(authSession.user.id);
         }
@@ -697,21 +724,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const sendMessage = (swapId: string, text: string) => {
     if (!text.trim()) return;
     const currentId = currentUser?.id || 'user_unknown';
+    const cleanText = text.trim();
     const newMsg: ChatMessage = {
       id: `msg_${Date.now()}`,
       swapId,
       senderId: currentId,
-      text: text.trim(),
+      text: cleanText,
       timestamp: new Date().toISOString(),
     };
     setMessages(prev => [...prev, newMsg]);
 
+    // Send via WebSocket STOMP if connected
+    const sentViaWs = stompChatService.sendMessage(swapId, currentId, cleanText);
+
     if (isApiConnected && currentUser) {
-      api.messages.send({ swapId, senderId: currentUser.id, text }).then((_dbMsg) => {
-        // Refresh message list from API
-        api.messages.getBySwap(swapId).then(list => setMessages(list)).catch(() => {});
-      }).catch(err => console.error('API send message error:', err));
-    } else {
+      if (!sentViaWs) {
+        // Fallback to HTTP REST POST if WebSocket is temporarily disconnected
+        api.messages.send({ swapId, senderId: currentUser.id, text: cleanText }).then((_dbMsg) => {
+          api.messages.getBySwap(swapId).then(list => setMessages(list)).catch(() => {});
+        }).catch(err => console.error('API send message error:', err));
+      }
+    } else if (!isApiConnected) {
       // Offline simulated counterparty response
       const swap = swaps.find(s => s.id === swapId);
       if (swap) {
@@ -806,6 +839,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activeSwapModalItem,
         toastMessage,
         isApiConnected,
+        isWsConnected,
         isLoading,
         login,
         register,

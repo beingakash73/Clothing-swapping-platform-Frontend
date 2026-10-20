@@ -1,3 +1,4 @@
+import { stompChatService } from '../../services/websocket';
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { SwapProposal } from '../../types';
@@ -20,7 +21,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ swap }) => {
     users, 
     items, 
     messages, 
-    sendMessage, 
+    sendMessage,
+    isWsConnected, 
     acceptSwap, 
     rejectSwap, 
     confirmAgreement, 
@@ -44,6 +46,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ swap }) => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [swapMessages]);
+
+  // Subscribe to real-time STOMP WebSocket messages for this specific swap thread
+  useEffect(() => {
+    const unsubscribe = stompChatService.subscribeToSwap(swap.id, () => {
+      // Re-scroll when message arrives
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [swap.id]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,10 +86,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ swap }) => {
       <div className="p-4 sm:p-5 bg-stone-50/90 border-b border-stone-200">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className={`w-2.5 h-2.5 rounded-full ${isWsConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'}`} />
             <span className="text-xs font-bold uppercase tracking-wider text-stone-600">
               Negotiation Thread #{swap.id.slice(-4)}
             </span>
+            {isWsConnected && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                STOMP Live
+              </span>
+            )}
             <span className="text-stone-300">•</span>
             <span className="text-xs text-stone-500">
               Trading with <strong className="text-slate-800 font-semibold">{otherUser.name}</strong>

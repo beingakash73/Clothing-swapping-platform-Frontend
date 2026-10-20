@@ -7,7 +7,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://clothing-swapping-platform.onrender.com',
+        changeOrigin: true,
+      },
+      '/ws': {
+        target: 'https://clothing-swapping-platform.onrender.com',
+        ws: true,
         changeOrigin: true,
       },
     },
