@@ -4,6 +4,12 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+
+  // Fix: global is not defined
+  define: {
+    global: 'globalThis',
+  },
+
   server: {
     proxy: {
       '/api': {
