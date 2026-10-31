@@ -228,7 +228,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
 
                     {/* Switch Persona Sub-section */}
-                    <div className="px-3 pt-2 pb-1">
+                    {/* <div className="px-3 pt-2 pb-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
                         Switch Demo Persona
                       </span>
@@ -237,6 +237,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="px-1 max-h-40 overflow-y-auto">
                       {users.map((u) => {
                         const isSelected = u.id === currentUser.id;
+                        
                         return (
                           <button
                             key={u.id}
@@ -263,7 +264,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           </button>
                         );
                       })}
-                    </div>
+                    </div>*/}
 
                     {/* Sign Out Button */}
                     <div className="px-2 pt-2 mt-1 border-t border-stone-100">
