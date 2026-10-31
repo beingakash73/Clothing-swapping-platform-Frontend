@@ -175,17 +175,30 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Persona Dropdown Menu */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-stone-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-4 py-2 border-b border-stone-100 flex items-center justify-between">
-                      <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setUserMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-stone-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-150 overflow-hidden">
+                      <div className="px-4 py-2.5 border-b border-stone-100">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
                           Signed in as
                         </span>
-                        <span className="text-xs font-bold text-slate-900 block truncate">
-                          {currentUser.name} ({currentUser.email})
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-xs font-bold text-slate-900 truncate" title={currentUser.name.replace(/\s*\((?:Admin|Moderator)\)/i, '')}>
+                            {currentUser.name.replace(/\s*\((?:Admin|Moderator)\)/i, '')}
+                          </span>
+                          {currentUser.role === 'admin' && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700 shrink-0">
+                              Admin
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-slate-500 block truncate mt-0.5" title={currentUser.email}>
+                          {currentUser.email}
                         </span>
                       </div>
-                    </div>
 
                     <div className="p-1 border-b border-stone-100">
                       <button
@@ -280,7 +293,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
                     </div>
                   </div>
-                )}
+                </>
+              )}
               </div>
             ) : (
               /* Unauthenticated Login / Register CTAs */
