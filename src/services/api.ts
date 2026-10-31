@@ -174,6 +174,44 @@ export interface DeleteItemResponse {
   error?: string;
 }
 
+export class ApiError extends Error {
+  status: number;
+  statusText?: string;
+  data?: any;
+
+  constructor(message: string, status: number, statusText?: string, data?: any) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.statusText = statusText;
+    this.data = data;
+  }
+}
+
+export type UnauthorizedListener = (message?: string) => void;
+const unauthorizedListeners = new Set<UnauthorizedListener>();
+
+export function onUnauthorized(listener: UnauthorizedListener): () => void {
+  unauthorizedListeners.add(listener);
+  return () => {
+    unauthorizedListeners.delete(listener);
+  };
+}
+
+export function notifyUnauthorized(message?: string): void {
+  tokenStorage.clear();
+  unauthorizedListeners.forEach((listener) => {
+    try {
+      listener(message);
+    } catch (e) {
+      console.error('Error in unauthorized listener:', e);
+    }
+  });
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('auth:unauthorized', { detail: { message } }));
+  }
+}
+
 // ==========================================
 // Generic Fetch Wrapper
 // ==========================================
@@ -195,15 +233,25 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (!response.ok) {
     let errorMsg = `API request failed: ${response.status} ${response.statusText}`;
+    let errorData: any = null;
     try {
-      const errorData = await response.json();
-      if (errorData.message || errorData.error) {
+      errorData = await response.json();
+      if (errorData?.message || errorData?.error) {
         errorMsg = errorData.message || errorData.error;
       }
     } catch {
       // no JSON body
     }
-    throw new Error(errorMsg);
+
+    if (response.status === 401) {
+      tokenStorage.clear();
+      const isLoginOrRegister = url.includes('/api/auth/login') || url.includes('/api/auth/register');
+      if (!isLoginOrRegister) {
+        notifyUnauthorized(errorMsg || 'Session expired or unauthorized. Please log in.');
+      }
+    }
+
+    throw new ApiError(errorMsg, response.status, response.statusText, errorData);
   }
 
   // Handle empty or 204 No Content responses gracefully
@@ -403,15 +451,22 @@ export const api = {
 
       if (!response.ok) {
         let errorMsg = `Upload failed: ${response.status} ${response.statusText}`;
+        let errorData: any = null;
         try {
-          const errorData = await response.json();
-          if (errorData.message || errorData.error) {
+          errorData = await response.json();
+          if (errorData?.message || errorData?.error) {
             errorMsg = errorData.message || errorData.error;
           }
         } catch {
           // no body
         }
-        throw new Error(errorMsg);
+
+        if (response.status === 401) {
+          tokenStorage.clear();
+          notifyUnauthorized(errorMsg || 'Session expired or unauthorized. Please log in.');
+        }
+
+        throw new ApiError(errorMsg, response.status, response.statusText, errorData);
       }
 
       return response.json();

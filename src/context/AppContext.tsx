@@ -19,7 +19,7 @@ import {
   PLATFORM_KPIS 
 } from '../data/mockData';
 import { evaluateSwapFairness } from '../utils/calculator';
-import { api } from '../services/api';
+import { api, onUnauthorized, tokenStorage } from '../services/api';
 import confetti from 'canvas-confetti';
 
 interface AppContextType {
@@ -85,11 +85,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
-    if (saved === 'null' || saved === 'undefined' || saved === '') return null;
-    if (saved === 'user_maya' || saved === 'user_leo' || saved === 'user_sofia') {
-      return 'user_admin';
-    }
-    return saved || 'user_admin';
+    if (!saved || saved === 'null' || saved === 'undefined' || saved === '') return null;
+    return saved;
   });
 
   const [items, setItems] = useState<ClothingItem[]>(() => {
@@ -149,6 +146,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 4000);
   }, []);
 
+  // Listen for unauthorized 401 events to clear auth state and notify user
+  useEffect(() => {
+    const unsubscribe = onUnauthorized((msg) => {
+      setCurrentUserId(null);
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
+      showToast(msg || 'Your session has expired. Please sign in to continue.');
+    });
+    return unsubscribe;
+  }, [showToast]);
+
   // Sync to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
@@ -184,6 +191,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const health = await api.checkHealth();
       if (health.status === 'ok') {
         setIsApiConnected(true);
+        const hasToken = !!tokenStorage.get();
         const [fetchedUsers, fetchedItems, fetchedSwaps, fetchedDisputes, fetchedKpis, fetchedMessages, authSession] = await Promise.all([
           api.users.getAll().catch(() => null),
           api.items.getAll().catch(() => null),
@@ -191,7 +199,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           api.disputes.getAll().catch(() => null),
           api.getKPIs().catch(() => null),
           api.messages.getAll().catch(() => null),
-          api.auth.me().catch(() => null),
+          api.auth.me().catch((err) => {
+            console.warn('Auth session verification failed:', err);
+            return null;
+          }),
         ]);
 
         if (fetchedUsers && fetchedUsers.length > 0) setUsers(fetchedUsers);
@@ -200,8 +211,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (fetchedDisputes && fetchedDisputes.length > 0) setDisputes(fetchedDisputes as any);
         if (fetchedKpis) setLiveKpis(fetchedKpis);
         if (fetchedMessages && fetchedMessages.length > 0) setMessages(fetchedMessages);
+
         if (authSession?.success && authSession.user) {
           setCurrentUserId(authSession.user.id);
+        } else if (hasToken && !authSession) {
+          // Token is present in localStorage but rejected by backend (401 or invalid)
+          setCurrentUserId(null);
+          tokenStorage.clear();
+          localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
         }
       } else {
         setIsApiConnected(false);

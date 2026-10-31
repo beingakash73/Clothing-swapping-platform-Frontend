@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
@@ -15,6 +15,7 @@ import { LogoutPage } from './pages/LogoutPage';
 import { CreateListingModal } from './components/items/CreateListingModal';
 import { SwapProposalModal } from './components/swaps/SwapProposalModal';
 import { Sparkles } from 'lucide-react';
+import { onUnauthorized } from './services/api';
 
 const AppContent: React.FC = () => {
   const { activeSwapModalItem, closeSwapModal, toastMessage, isAuthenticated } = useApp();
@@ -25,12 +26,42 @@ const AppContent: React.FC = () => {
   const [isCreateListingOpen, setIsCreateListingOpen] = useState<boolean>(false);
 
   const handleNavigate = (view: string, itemId?: string) => {
+    const protectedViews = ['dashboard', 'swaps', 'messages', 'admin'];
+    if (protectedViews.includes(view) && !isAuthenticated) {
+      if (itemId) {
+        setSelectedItemId(itemId);
+      }
+      setCurrentView('login');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (itemId) {
       setSelectedItemId(itemId);
     }
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Automatically navigate to login page and dismiss modals when backend returns 401 Unauthorized
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setIsCreateListingOpen(false);
+      closeSwapModal();
+      handleNavigate('login');
+    };
+
+    const unsub = onUnauthorized(() => {
+      handleUnauthorized();
+    });
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+
+    return () => {
+      unsub();
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
+  }, [closeSwapModal, isAuthenticated]);
 
   const handleSelectSwapForChat = (swapId: string) => {
     setSelectedSwapId(swapId);
@@ -45,6 +76,11 @@ const AppContent: React.FC = () => {
   };
 
   const renderView = () => {
+    const protectedViews = ['dashboard', 'swaps', 'messages', 'admin'];
+    if (protectedViews.includes(currentView) && !isAuthenticated) {
+      return <LoginPage onNavigate={handleNavigate} />;
+    }
+
     switch (currentView) {
       case 'home':
         return (

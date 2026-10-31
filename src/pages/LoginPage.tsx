@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { onUnauthorized } from '../services/api';
 import {
   Sparkles,
   Leaf,
@@ -29,6 +30,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const unsub = onUnauthorized((msg) => {
+      setErrorMessage(msg || 'Your session has expired. Please sign in again.');
+    });
+    return unsub;
+  }, []);
 
   // Login form state
   const [loginIdentifier, setLoginIdentifier] = useState('moderation@threadloop.org');
