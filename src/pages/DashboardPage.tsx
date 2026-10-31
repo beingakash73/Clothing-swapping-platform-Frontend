@@ -22,7 +22,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigate, 
   onOpenCreateListing 
 }) => {
-  const { currentUser, items, users, switchUser, deleteClothingItem, isAuthenticated } = useApp();
+  const { currentUser, items, deleteClothingItem, isAuthenticated } = useApp();
 
   const [closetTab, setClosetTab] = useState<'available' | 'in_negotiation' | 'swapped' | 'all'>('available');
 
@@ -43,7 +43,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             onClick={() => onNavigate('login')}
             className="w-full py-3 px-4 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-xs font-semibold shadow-md transition-colors"
           >
-            Sign In / Choose Persona →
+            Sign In →
           </button>
         </div>
       </div>
@@ -304,32 +304,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             ))}
           </div>
         )}
-      </div>
-
-      {/* Demo Persona Quick Switcher Banner */}
-      <div className="p-6 rounded-3xl bg-stone-100/80 border border-stone-200 text-xs space-y-3">
-        <span className="font-bold uppercase tracking-wider text-stone-500 block">
-          Demo Persona Switcher (For Pair Programming / Evaluation)
-        </span>
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          {users.map(u => (
-            <button
-              key={u.id}
-              onClick={() => switchUser(u.id)}
-              className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all ${
-                u.id === currentUser.id
-                  ? 'bg-white border-forest-600 ring-2 ring-forest-600 shadow-xs'
-                  : 'bg-white/60 border-stone-200 hover:bg-white'
-              }`}
-            >
-              <img src={u.avatar} alt={u.name} className="w-8 h-8 rounded-lg object-cover" />
-              <div className="min-w-0">
-                <span className="font-bold text-slate-800 block truncate">{u.name}</span>
-                <span className="text-[10px] text-stone-500 capitalize">{u.role}</span>
-              </div>
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );

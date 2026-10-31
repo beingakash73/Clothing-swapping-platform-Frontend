@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   onOpenCreateListing
 }) => {
-  const { currentUser, isAuthenticated, users, switchUser, swaps, isApiConnected, logout } = useApp();
+  const { currentUser, isAuthenticated, swaps, isApiConnected, logout } = useApp();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Count active pending swaps for current user if logged in
@@ -239,45 +239,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                         </button>
                       )}
                     </div>
-
-                    {/* Switch Persona Sub-section */}
-                    {/* <div className="px-3 pt-2 pb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Switch Demo Persona
-                      </span>
-                    </div>
-
-                    <div className="px-1 max-h-40 overflow-y-auto">
-                      {users.map((u) => {
-                        const isSelected = u.id === currentUser.id;
-                        
-                        return (
-                          <button
-                            key={u.id}
-                            onClick={() => {
-                              switchUser(u.id);
-                              setUserMenuOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-left transition-colors ${isSelected ? 'bg-forest-50 border border-forest-200' : 'hover:bg-stone-50'
-                              }`}
-                          >
-                            <img
-                              src={u.avatar}
-                              alt={u.name}
-                              className="w-7 h-7 rounded-lg object-cover"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <span className="text-xs font-semibold text-slate-800 truncate block">
-                                {u.name}
-                              </span>
-                              <span className="text-[10px] text-slate-400 block truncate">
-                                {u.role === 'admin' ? '🛡️ Admin' : `${u.completedSwaps} swaps • ${u.location.city}`}
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>*/}
 
                     {/* Sign Out Button */}
                     <div className="px-2 pt-2 mt-1 border-t border-stone-100">

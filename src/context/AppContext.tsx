@@ -86,7 +86,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentUserId, setCurrentUserId] = useState<string | null>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
     if (saved === 'null' || saved === 'undefined' || saved === '') return null;
-    return saved || 'user_maya';
+    if (saved === 'user_maya' || saved === 'user_leo' || saved === 'user_sofia') {
+      return 'user_admin';
+    }
+    return saved || 'user_admin';
   });
 
   const [items, setItems] = useState<ClothingItem[]>(() => {
@@ -256,7 +259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(`Welcome back, ${found.name}! 🌿`);
       return { success: true };
     }
-    return { success: false, message: 'Invalid credentials. Please select a demo persona or create an account.' };
+    return { success: false, message: 'Invalid credentials. Please enter a valid account or sign in as Admin.' };
   };
 
   const register = async (userData: { name: string; email: string; password?: string; city?: string; state?: string; bio?: string }): Promise<{ success: boolean; message?: string }> => {
@@ -806,7 +809,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setUsers(MOCK_USERS);
-    setCurrentUserId('user_maya');
+    setCurrentUserId('user_admin');
     setItems(MOCK_ITEMS);
     setSwaps(MOCK_SWAP_PROPOSALS);
     setMessages(MOCK_MESSAGES);

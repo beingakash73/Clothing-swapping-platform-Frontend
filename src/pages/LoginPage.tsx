@@ -31,7 +31,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Login form state
-  const [loginIdentifier, setLoginIdentifier] = useState('maya@threadloop.org');
+  const [loginIdentifier, setLoginIdentifier] = useState('moderation@threadloop.org');
   const [loginPassword, setLoginPassword] = useState('password123');
 
   // Registration form state
@@ -198,7 +198,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5">
                   {mode === 'login'
-                    ? 'Enter your credentials or choose a quick demo persona.'
+                    ? 'Enter your credentials or use the 1-click administrator login.'
                     : 'Start swapping garments with zero monetary transactions.'}
                 </p>
               </div>
@@ -277,7 +277,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
                       required
                       value={loginIdentifier}
                       onChange={(e) => setLoginIdentifier(e.target.value)}
-                      placeholder="e.g. maya@threadloop.org or user_maya"
+                      placeholder="e.g. moderation@threadloop.org or user_admin"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500/40 focus:border-forest-600 bg-stone-50/50"
                     />
                   </div>
@@ -465,44 +465,61 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, initialMode = 
               </form>
             )}
 
-            {/* Quick Demo Personas Selector */}
+            {/* Quick Admin Demo Profile */}
             <div className="mt-8 pt-6 border-t border-stone-100">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  ⚡ 1-Click Demo Profiles
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-700">
+                  ⚡ 1-Click Admin Access
                 </span>
                 <span className="text-[11px] text-slate-400">
-                  Instant switch for testing
+                  Instant administrative login
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {users.slice(0, 4).map((u) => {
+              <div className="space-y-2">
+                {users.filter(u => u.role === 'admin').map((u) => {
                   const isCurrent = currentUser?.id === u.id;
                   return (
                     <button
                       key={u.id}
                       type="button"
                       onClick={() => handleQuickLogin(u.id)}
-                      className={`p-2.5 rounded-2xl border text-left transition-all relative flex flex-col items-center sm:items-start text-center sm:text-left ${isCurrent
-                          ? 'border-forest-600 bg-forest-50/80 ring-1 ring-forest-500 shadow-sm'
-                          : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
+                      className={`w-full p-3 rounded-2xl border text-left transition-all relative flex items-center justify-between ${isCurrent
+                          ? 'border-purple-600 bg-purple-50/80 ring-1 ring-purple-500 shadow-sm'
+                          : 'border-stone-200 hover:border-purple-300 hover:bg-purple-50/40'
                         }`}
                     >
-                      <img
-                        src={u.avatar}
-                        alt={u.name}
-                        className="w-9 h-9 rounded-xl object-cover mb-1.5 ring-1 ring-stone-200"
-                      />
-                      <span className="text-xs font-bold text-slate-900 block truncate max-w-full">
-                        {u.name}
-                      </span>
-                      <span className="text-[10px] text-forest-700 font-medium block">
-                        {u.role === 'admin' ? '🛡️ Admin' : `${u.completedSwaps} Swaps`}
-                      </span>
-                      {isCurrent && (
-                        <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500" />
-                      )}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={u.avatar}
+                          alt={u.name}
+                          className="w-10 h-10 rounded-xl object-cover ring-1 ring-purple-200"
+                        />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-900 truncate">
+                              {u.name}
+                            </span>
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700">
+                              Admin
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-slate-500 block truncate">
+                            {u.email}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {isCurrent ? (
+                          <span className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-lg bg-purple-700 text-white text-[10px] font-bold shadow-2xs">
+                            Sign In As Admin →
+                          </span>
+                        )}
+                      </div>
                     </button>
                   );
                 })}

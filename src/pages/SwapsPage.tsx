@@ -38,7 +38,7 @@ export const SwapsPage: React.FC<SwapsPageProps> = ({
             onClick={() => onNavigate('login')}
             className="w-full py-3 px-4 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-xs font-semibold shadow-md transition-colors"
           >
-            Sign In / Choose Persona →
+            Sign In →
           </button>
         </div>
       </div>
