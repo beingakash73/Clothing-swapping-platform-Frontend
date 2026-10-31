@@ -87,7 +87,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: 'user_admin',
-    name: 'Sarah Connor (Admin)',
+    name: 'Sarah Connor',
     email: 'moderation@threadloop.org',
     role: 'admin',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
