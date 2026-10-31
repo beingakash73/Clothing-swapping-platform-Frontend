@@ -466,7 +466,7 @@ export const MOCK_ITEMS: ClothingItem[] = [
       'https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=1000&q=80',
     ],
     ownerId: 'user_admin',
-    ownerName: 'Sarah Connor (Admin)',
+    ownerName: 'Sarah Connor',
     ownerAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
     ownerCity: 'Brooklyn',
     ownerState: 'NY',
