@@ -190,7 +190,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="p-1 border-b border-stone-100">
                       <button
                         onClick={() => {
-                          onNavigate('dashboard');
+                          onNavigate('login');
                           setUserMenuOpen(false);
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium text-slate-700 hover:bg-stone-50"
