@@ -14,6 +14,7 @@ import { LoginPage } from './pages/LoginPage';
 import { LogoutPage } from './pages/LogoutPage';
 import { CreateListingModal } from './components/items/CreateListingModal';
 import { SwapProposalModal } from './components/swaps/SwapProposalModal';
+import { AiChatWidget } from './components/chat/AiChatWidget';
 import { Sparkles } from 'lucide-react';
 import { onUnauthorized } from './services/api';
 
@@ -172,7 +173,7 @@ const AppContent: React.FC = () => {
 
       {/* In-App Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-22 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 text-xs max-w-sm">
             <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
               <Sparkles className="w-3.5 h-3.5" />
@@ -181,6 +182,9 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Global AI Chat Assistant */}
+      <AiChatWidget onNavigate={handleNavigate} />
     </div>
   );
 };

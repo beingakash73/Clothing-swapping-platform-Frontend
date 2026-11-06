@@ -129,6 +129,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Action Buttons & Authentication / Role Switcher */}
           <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Ask AI Assistant Button */}
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-ai-chat'))}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300/80 hover:bg-emerald-100 active:scale-95 transition-all shadow-2xs"
+              title="Chat with ThreadLoop AI Stylist"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+              <span className="hidden md:inline">AI Stylist</span>
+            </button>
+
             {/* List An Item Button */}
             <button
               onClick={() => {

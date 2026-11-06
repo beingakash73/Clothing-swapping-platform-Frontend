@@ -568,6 +568,19 @@ export const api = {
   },
 
   /**
+   * AI Assistant Controller: /api/ai
+   * Endpoints:
+   * - POST /api/ai/chat
+   */
+  ai: {
+    chat: (message: string): Promise<{ answer: string }> =>
+      request<{ answer: string }>('/api/ai/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message }),
+      }),
+  },
+
+  /**
    * Seed Controller: /api/seed
    * Endpoints:
    * - POST /api/seed

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { ChatWindow } from '../components/chat/ChatWindow';
-import { MessageSquare, ArrowLeftRight } from 'lucide-react';
+import { MessageSquare, ArrowLeftRight, Bot, Sparkles } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
 
 interface MessagesPageProps {
@@ -53,17 +53,29 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
       {/* Page Heading */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-forest-700">
-          <MessageSquare className="w-4 h-4" />
-          <span>Real-Time Barter Negotiation</span>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-forest-700">
+            <MessageSquare className="w-4 h-4" />
+            <span>Real-Time Barter Negotiation</span>
+          </div>
+          <h1 className="font-serif text-3xl font-bold text-slate-900">
+            Negotiation Messenger
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-500">
+            Directly coordinate condition inspection, Safe Hub pickup, or courier delivery.
+          </p>
         </div>
-        <h1 className="font-serif text-3xl font-bold text-slate-900">
-          Negotiation Messenger
-        </h1>
-        <p className="text-xs sm:text-sm text-stone-500">
-          Directly coordinate condition inspection, Safe Hub pickup, or courier delivery.
-        </p>
+
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('open-ai-chat'))}
+          className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 rounded-2xl bg-gradient-to-r from-forest-800 to-forest-900 text-white text-xs font-semibold shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all border border-emerald-500/30"
+          title="Chat with ThreadLoop AI Stylist"
+        >
+          <Bot className="w-4 h-4 text-emerald-400" />
+          <span>Ask AI Assistant</span>
+          <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+        </button>
       </div>
 
       {mySwaps.length === 0 ? (
